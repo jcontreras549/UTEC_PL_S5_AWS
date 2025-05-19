@@ -1,0 +1,41 @@
+name: Terraform in Environments
+
+on:
+  push:
+    paths:
+      - 'environments/**'
+
+jobs:
+  terraform:
+    name: Terraform Plan & Apply (${{ matrix.env }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        env: [dev, qa, prod]
+
+    defaults:
+      run:
+        working-directory: ./environments/${{ matrix.env }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -var-file="${{ matrix.env }}.tfvars"
+
+      # Descomenta para aplicar automáticamente (solo si es seguro)
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
