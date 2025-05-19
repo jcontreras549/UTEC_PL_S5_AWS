@@ -1,0 +1,37 @@
+name: Terraform in Environments
+
+on:
+  push:
+    paths:
+      - 'environments/dev/**'
+      
+jobs:
+  terraform-dev:
+    if: github.event.head_commit.message != '' && startsWith(github.ref, 'refs/heads/') && contains(github.event.head_commit.message, '[dev]')
+    runs-on: ubuntu-latest
+    name: Terraform Dev Only
+
+    defaults:
+      run:
+        working-directory: ./environments/dev
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -var-file="dev.tfvars"
+
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve tfplan
