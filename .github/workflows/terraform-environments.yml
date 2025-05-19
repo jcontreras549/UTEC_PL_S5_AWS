@@ -28,7 +28,7 @@ jobs:
           terraform_version: 1.12.0
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -var-file="${{ matrix.env }}.tfvars"
 
       - name: Terraform Validate
         run: terraform validate
