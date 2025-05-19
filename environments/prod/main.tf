@@ -1,9 +1,5 @@
-provider "aws" {
-  region = var.region
-}
-
 module "vpc" {
-  source = "./modules/vpc"
+  source = "../../modules/vpc"
 
   name            = "eks-vpc"
   cidr            = "10.0.0.0/16"
@@ -20,8 +16,21 @@ module "vpc" {
   }
 }
 
+module "ec2" {
+  source             = "../../modules/ec2"
+  ami                = "ami-0c02fb55956c7d316"
+  instance_type      = "t3.micro"
+  subnet_id          = module.vpc.public_subnets[0]   # <--- Aquí sí puedes usarlo
+  key_name           = var.key_name
+  security_group_ids = []
+  tags = {
+    Name        = "ec2-demo"
+    Environment = "demo"
+  }
+}
+
 module "eks" {
-  source = "./modules/eks"
+  source = "../../modules/eks"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
@@ -33,4 +42,11 @@ module "eks" {
     Environment = "demo"
     Terraform   = "true"
   }
+}
+
+module "ecr_repo" {
+  source           = "../../modules/ecr"
+  ecr_name         = ["frontend", "backend", "auth"]
+  tags             = var.tags
+  image_mutability = "IMMUTABLE"
 }
