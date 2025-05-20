@@ -3,7 +3,7 @@ name: Terraform in Environments
 on:
   push:
     paths:
-      - 'environments/dev/**'
+      - 'environments/prod/**'
 
 jobs:
   terraform:
